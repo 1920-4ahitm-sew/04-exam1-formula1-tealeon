@@ -11,6 +11,8 @@ import javax.persistence.*;
 @Table(name="F1_TEAM")
 public class Team {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
 

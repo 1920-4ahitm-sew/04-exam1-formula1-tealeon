@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Table(name="F1_RACE")
 public class Race {
 
+    @Id
     private Long id;
     private String country;
     private LocalDate date;
