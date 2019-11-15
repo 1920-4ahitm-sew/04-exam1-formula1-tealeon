@@ -10,6 +10,7 @@ import javax.json.JsonValue;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import javax.ws.rs.Path;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -28,13 +29,13 @@ public class ResultsRestClient {
      * Dieses JsonArray wird an die Methode persistResult(...) übergeben
      */
     public void readResultsFromEndpoint() {
-        this.client = ClientBuilder.newClient();
-        this.target = client.target(RESULTS_ENDPOINT);
-
-        Response response = this.target.request(MediaType.TEXT_PLAIN).get();
-        JsonArray payload = response.readEntity(JsonArray.class);
-
-        persistResult(payload);
+//        this.client = ClientBuilder.newClient();
+//        this.target = client.target(RESULTS_ENDPOINT);
+//
+//        Response response = this.target.request(MediaType.TEXT_PLAIN).get();
+//        JsonArray payload = response.readEntity(JsonArray.class);
+//
+//        persistResult(payload);
     }
 
     /**
