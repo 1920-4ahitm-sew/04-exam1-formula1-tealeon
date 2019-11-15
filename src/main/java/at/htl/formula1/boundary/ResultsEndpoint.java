@@ -56,9 +56,9 @@ public class ResultsEndpoint {
         Race r = query.getSingleResult();
         Long raceId=r.getId();
 
-        TypedQuery<String> query2 = em.createNamedQuery("Result.findWinnerById", String.class)
-                .setParameter("RACE", raceId);
-        String winner = query2.getSingleResult();
+//        TypedQuery<String> query2 = em.createNamedQuery("Result.findWinnerById", String.class)
+//                .setParameter("RACE", raceId);
+//        String winner = query2.getSingleResult();
         return null;
     }
 
