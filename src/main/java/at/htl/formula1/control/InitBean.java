@@ -13,7 +13,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,7 +37,7 @@ public class InitBean {
     ResultsRestClient client;
 
 
-    public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    public void init(@Observes @Initialized(ApplicationScoped.class) Object init) throws IOException {
 
         readTeamsAndDriversFromFile(TEAM_FILE_NAME);
         readRacesFromFile(RACES_FILE_NAME);
@@ -48,9 +50,19 @@ public class InitBean {
      *
      * @param racesFileName
      */
-    private void readRacesFromFile(String racesFileName) {
+    private void readRacesFromFile(String racesFileName) throws IOException {
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(getClass().getResourceAsStream(racesFileName)));
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+        br.readLine();
 
+        String line;
+        while ((line = br.readLine()) != null){
+            String[] data = line.split(";");
+            LocalDate localDate = LocalDate.parse(data[3], dtf);
+            em.persist(new Race(Long.parseLong(data[1]), data[2], localDate));
+        }
     }
 
     /**
@@ -60,8 +72,20 @@ public class InitBean {
      *
      * @param teamFileName
      */
-    private void readTeamsAndDriversFromFile(String teamFileName) {
+    private void readTeamsAndDriversFromFile(String teamFileName) throws IOException {
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(getClass().getResourceAsStream(teamFileName)));
 
+        br.readLine();
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] data = line.split(";");
+            Team team = new Team(data[1]);
+            em.persist(team);
+            em.persist(new Driver(data[2], team));
+            em.persist(new Driver(data[3], team));
+        }
     }
 
     /**
