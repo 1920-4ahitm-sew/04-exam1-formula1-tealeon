@@ -40,7 +40,7 @@ public class ResultsEndpoint {
                 .setParameter("DRIVER", driverId);
         Result r = query2.getSingleResult();
 
-        return (JsonObject) r;
+        return null;
     }
 
     /**
@@ -59,7 +59,7 @@ public class ResultsEndpoint {
         TypedQuery<String> query2 = em.createNamedQuery("Result.findWinnerById", String.class)
                 .setParameter("RACE", raceId);
         String winner = query2.getSingleResult();
-        return winner;
+        return null;
     }
 
 
