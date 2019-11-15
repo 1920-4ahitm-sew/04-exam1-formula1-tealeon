@@ -2,6 +2,7 @@ package at.htl.formula1.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import java.time.LocalDate;
 
@@ -12,6 +13,10 @@ import java.time.LocalDate;
  */
 @Entity
 @Table(name="F1_RACE")
+@NamedQuery(
+        name="Race.findRaceById",
+        query="select r from Race r where r.id=:ID"
+)
 public class Race {
 
     @Id
