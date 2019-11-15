@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.stream.Stream;
 
 @ApplicationScoped
+@Transactional
 public class InitBean {
 
     private static final String TEAM_FILE_NAME = "teams.csv";
@@ -50,6 +51,7 @@ public class InitBean {
      *
      * @param racesFileName
      */
+
     private void readRacesFromFile(String racesFileName) throws IOException {
 //        BufferedReader br = new BufferedReader(
 //                new InputStreamReader(getClass().getResourceAsStream(racesFileName)));
@@ -63,6 +65,21 @@ public class InitBean {
 //            LocalDate localDate = LocalDate.parse(data[3], dtf);
 //            em.persist(new Race(Long.parseLong(data[1]), data[2], localDate));
 //        }
+
+        URL url = Thread.currentThread().getContextClassLoader()
+                .getResource(racesFileName);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+        try (Stream<String> stream = Files.lines(Paths.get(url.getPath()))) {
+            stream
+                    .skip(1)
+                    .map(lines -> lines.split(";"))
+                    .map(a -> new Race(Long.parseLong(a[0]), a[1], LocalDate.parse(a[2],dtf)))
+                    .forEach(em::merge);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -93,17 +110,17 @@ public class InitBean {
             stream
                     .skip(1)
                     .map(lines -> lines.split(";"))
-                    .map(a -> new Team(a[1]))
-                    .forEach(System.out::println);
+                    .map(a -> new Team(a[0]))
+                    .forEach(em::merge);
 //            stream
 //                    .skip(1)
 //                    .map(lines -> lines.split(";"))
-//                    .map(a -> new Driver(a[2],new Team(a[1])))
-//                    .forEach(System.out::println);
+//                    .map(a -> new Driver(a[1],new Team(a[0])))
+//                    .forEach(em::merge);
 //            stream
 //                    .skip(1)
 //                    .map(lines -> lines.split(";"))
-//                    .map(a -> new Driver(a[3],new Team(a[1])))
+//                    .map(a -> new Driver(a[2],new Team(a[0])))
 //                    .forEach(System.out::println);
         } catch (IOException e) {
             e.printStackTrace();
