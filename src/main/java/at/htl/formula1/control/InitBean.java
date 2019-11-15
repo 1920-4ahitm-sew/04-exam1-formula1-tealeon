@@ -51,18 +51,18 @@ public class InitBean {
      * @param racesFileName
      */
     private void readRacesFromFile(String racesFileName) throws IOException {
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(getClass().getResourceAsStream(racesFileName)));
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        br.readLine();
-
-        String line;
-        while ((line = br.readLine()) != null){
-            String[] data = line.split(";");
-            LocalDate localDate = LocalDate.parse(data[3], dtf);
-            em.persist(new Race(Long.parseLong(data[1]), data[2], localDate));
-        }
+//        BufferedReader br = new BufferedReader(
+//                new InputStreamReader(getClass().getResourceAsStream(racesFileName)));
+//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//
+//        br.readLine();
+//
+//        String line;
+//        while ((line = br.readLine()) != null){
+//            String[] data = line.split(";");
+//            LocalDate localDate = LocalDate.parse(data[3], dtf);
+//            em.persist(new Race(Long.parseLong(data[1]), data[2], localDate));
+//        }
     }
 
     /**
@@ -73,18 +73,40 @@ public class InitBean {
      * @param teamFileName
      */
     private void readTeamsAndDriversFromFile(String teamFileName) throws IOException {
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(getClass().getResourceAsStream(teamFileName)));
+//        BufferedReader br = new BufferedReader(
+//                new InputStreamReader(getClass().getResourceAsStream(teamFileName)));
+//
+//        br.readLine();
+//
+//        String line;
+//        while ((line = br.readLine()) != null) {
+//            String[] data = line.split(";");
+//            Team team = new Team(data[1]);
+//            em.persist(team);
+//            em.persist(new Driver(data[2], team));
+//            em.persist(new Driver(data[3], team));
+//        }
 
-        br.readLine();
-
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] data = line.split(";");
-            Team team = new Team(data[1]);
-            em.persist(team);
-            em.persist(new Driver(data[2], team));
-            em.persist(new Driver(data[3], team));
+        URL url = Thread.currentThread().getContextClassLoader()
+                .getResource(teamFileName);
+        try (Stream<String> stream = Files.lines(Paths.get(url.getPath()))) {
+            stream
+                    .skip(1)
+                    .map(lines -> lines.split(";"))
+                    .map(a -> new Team(a[1]))
+                    .forEach(System.out::println);
+//            stream
+//                    .skip(1)
+//                    .map(lines -> lines.split(";"))
+//                    .map(a -> new Driver(a[2],new Team(a[1])))
+//                    .forEach(System.out::println);
+//            stream
+//                    .skip(1)
+//                    .map(lines -> lines.split(";"))
+//                    .map(a -> new Driver(a[3],new Team(a[1])))
+//                    .forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
