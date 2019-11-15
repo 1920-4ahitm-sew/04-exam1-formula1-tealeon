@@ -6,23 +6,32 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-
+@Path("driver")
 public class ResultsEndpoint {
 
+    @PersistenceContext
+    EntityManager em;
 
     /**
      * @param name als QueryParam einzulesen
      * @return JsonObject
      */
+    @GET
+    @Path("points")
     public JsonObject getPointsSumOfDriver(
-            String name
+            @QueryParam("name") String name
     ) {
-        return null;
+        TypedQuery<Driver> query = em
+                .createNamedQuery("Driver.findDriverPointsByName", Driver.class)
+                .setParameter("NAME", name);
+        Driver d = query.getSingleResult();
+        return (JsonObject) d;
     }
 
     /**
