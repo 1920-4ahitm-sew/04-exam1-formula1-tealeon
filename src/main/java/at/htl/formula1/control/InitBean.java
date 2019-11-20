@@ -37,7 +37,6 @@ public class InitBean {
     @Inject
     ResultsRestClient client;
 
-
     public void init(@Observes @Initialized(ApplicationScoped.class) Object init) throws IOException {
 
         readTeamsAndDriversFromFile(TEAM_FILE_NAME);
@@ -53,25 +52,12 @@ public class InitBean {
      */
 
     private void readRacesFromFile(String racesFileName) throws IOException {
-//        BufferedReader br = new BufferedReader(
-//                new InputStreamReader(getClass().getResourceAsStream(racesFileName)));
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//
-//        br.readLine();
-//
-//        String line;
-//        while ((line = br.readLine()) != null){
-//            String[] data = line.split(";");
-//            LocalDate localDate = LocalDate.parse(data[3], dtf);
-//            em.persist(new Race(Long.parseLong(data[1]), data[2], localDate));
-//        }
-
         URL url = Thread.currentThread().getContextClassLoader()
                 .getResource(racesFileName);
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-        try (Stream<String> stream = Files.lines(Paths.get(url.getPath()))) {
+        try (Stream<String> stream = Files.lines(Paths.get(url.getPath()), StandardCharsets.UTF_8)) {
             stream
                     .skip(1)
                     .map(lines -> lines.split(";"))
@@ -89,43 +75,20 @@ public class InitBean {
      *
      * @param teamFileName
      */
+    // tag::readTeamsAndDrivers[]
     private void readTeamsAndDriversFromFile(String teamFileName) throws IOException {
-//        BufferedReader br = new BufferedReader(
-//                new InputStreamReader(getClass().getResourceAsStream(teamFileName)));
-//
-//        br.readLine();
-//
-//        String line;
-//        while ((line = br.readLine()) != null) {
-//            String[] data = line.split(";");
-//            Team team = new Team(data[1]);
-//            em.persist(team);
-//            em.persist(new Driver(data[2], team));
-//            em.persist(new Driver(data[3], team));
-//        }
-
         URL url = Thread.currentThread().getContextClassLoader()
                 .getResource(teamFileName);
-        try (Stream<String> stream = Files.lines(Paths.get(url.getPath()))) {
+        try (Stream<String> stream = Files.lines(Paths.get(url.getPath()), StandardCharsets.UTF_8)) {
             stream
                     .skip(1)
                     .map(lines -> lines.split(";"))
-                    .map(a -> new Team(a[0]))
-                    .forEach(em::merge);
-//            stream
-//                    .skip(1)
-//                    .map(lines -> lines.split(";"))
-//                    .map(a -> new Driver(a[1],new Team(a[0])))
-//                    .forEach(em::merge);
-//            stream
-//                    .skip(1)
-//                    .map(lines -> lines.split(";"))
-//                    .map(a -> new Driver(a[2],new Team(a[0])))
-//                    .forEach(System.out::println);
+                    .forEach(this::persistTeamAndDrivers);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    // end::readTeamsAndDrivers[]
 
     /**
      * Es wird überprüft ob es das übergebene Team schon in der Tabelle F1_TEAM gibt.
@@ -137,10 +100,21 @@ public class InitBean {
      *
      * @param line String-Array mit den einzelnen Werten der csv-Datei
      */
-
+    // tag::persistTeamAndDrivers[]
     private void persistTeamAndDrivers(String[] line) {
-
+        Team team = null;
+        try {
+            team = em.createNamedQuery("Team.findByName", Team.class)
+                    .setParameter("NAME", line[0])
+                    .getSingleResult();
+        } catch (NoResultException ex) {
+            team = new Team(line[0]);
+            em.persist(team);
+        }
+        em.persist(new Driver(line[1], team));
+        em.persist(new Driver(line[2], team));
     }
+    // end::persistTeamAndDrivers[]
 
 
 }
