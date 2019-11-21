@@ -19,6 +19,8 @@ import javax.ws.rs.core.Response;
 
 public class ResultsRestClient {
 
+    @PersistenceContext
+    EntityManager em;
 
     public static final String RESULTS_ENDPOINT = "http://vm90.htl-leonding.ac.at/results";
     private Client client;
@@ -57,9 +59,29 @@ public class ResultsRestClient {
      *
      * @param resultsJson
      */
+    // tag::persistResult[]
     @Transactional
     void persistResult(JsonArray resultsJson) {
+        for (JsonValue jsonValue : resultsJson) {
+            JsonObject resultJson = jsonValue.asJsonObject();
+            Driver driver = em
+                    .createNamedQuery("Driver.findDriverByName", Driver.class)
+                    .setParameter("NAME", resultJson.getString("driverFullName"))
+                    .getSingleResult();
 
+            Race race = em
+                    .createQuery("select r from Race r where r.id = :ID", Race.class)
+                    .setParameter("ID", Long.valueOf(resultJson.getInt("raceNo")))
+                    .getSingleResult();
+
+            em.persist(new Result(
+                    race,
+                    resultJson.getInt("position"),
+                    driver
+            ));
+        }
     }
+    // end::persistResult[]
+
 
 }

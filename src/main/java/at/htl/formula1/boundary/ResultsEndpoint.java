@@ -24,6 +24,7 @@ public class ResultsEndpoint {
      * @param name als QueryParam einzulesen
      * @return JsonObject
      */
+    // tag::getPointsSumOfDriver[]
     @GET
     @Path("points")
     @Produces(MediaType.APPLICATION_JSON)
@@ -31,17 +32,22 @@ public class ResultsEndpoint {
             @QueryParam("name") String name
     ) {
         TypedQuery<Driver> query1 = em
-                .createNamedQuery("Driver.findDriverIdByName", Driver.class)
+                .createNamedQuery("Driver.findDriverByName", Driver.class)
                 .setParameter("NAME", name);
         Driver d = query1.getSingleResult();
-        Long driverId = d.getId();
-        TypedQuery<Result> query2 = em
-                .createNamedQuery("Result.findDriverPointsById", Result.class)
-                .setParameter("DRIVER", driverId);
-        Result r = query2.getSingleResult();
+        String driverName = d.getName();
+        Long points = em
+                .createNamedQuery("Result.sumPointsForDriver", Long.class)
+                .setParameter("NAME", name)
+                .getSingleResult();
 
-        return null;
+        return Json
+                .createObjectBuilder()
+                .add("driver", driverName)
+                .add("points", points)
+                .build();
     }
+    // end::getPointsSumOfDriver[]
 
     /**
      * @param id des Rennens

@@ -10,11 +10,13 @@ import javax.persistence.*;
 @Entity
 @Table(name="F1_RESULT")
 @NamedQueries(
+
+        // tag::Result.sumPointsForDriver[]
         @NamedQuery(
-                name="Result.findDriverPointsById",
-                query="select sum(r) from Result r where r.driver = :DRIVER " +
-                        "and r.position=1"
+                name="Result.sumPointsForDriver",
+                query="select sum(r.points) from Result r where r.driver.name = :NAME "
         )
+        // end::Result.sumPointsForDriver[]
 )
 public class Result {
 

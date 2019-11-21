@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Table(name="F1_DRIVER")
 @NamedQueries(
         @NamedQuery(
-                name="Driver.findDriverIdByName",
+                name="Driver.findDriverByName",
                 query="select d from Driver d where d.name = :NAME"
         )
 )
