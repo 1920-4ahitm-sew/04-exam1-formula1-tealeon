@@ -72,9 +72,69 @@ include::src/main/java/at/htl/formula1/control/InitBean.java[tags=persistTeamAnd
 MediaType vom Response muss natürlich ein JSON sein, da payload ein JsonArray ist.
 
 [source,java]
-
 ----
         Response response = this.target.request(MediaType.APPLICATION_JSON).get();
 ----
 
+Das Speichern der Daten hätte so ausschauen können:
 
+[source,java]
+----
+include::src/main/java/at/htl/formula1/boundary/ResultsRestClient.java.[tags=persistResult]
+----
+
+
+== Aufgabe 3: Gesamtpunkte eines Fahrers
+
+Die NamedQuery kann nicht funktionieren, weil alle Spalten summiert werden.
+Ich hätte sum(r.points) verwenden sollen, damit die Punkte des Fahrers summiert werden.
+Außerdem habe ich den Fehler gemacht, dass nur die Punkte gezählt werden, wenn
+der Fahrer der 1. Platz beim Rennen war.
+[source, java]
+----
+@NamedQuery(
+                name="Result.findDriverPointsById",
+                query="select sum(r) from Result r where r.driver = :DRIVER " +
+                        "and r.position=1"
+        )
+----
+
+Außerdem hätte ich bei Result einfach mit dem Fahrernamen
+nach den Punkten suchen können, anstatt mit der FahrerId.
+Bei der Query "Result.findDriverPointsById" bekomme ich die Punkte
+des Fahrers zurück, deshalb Hätte ich statt Result ein Long gebraucht.
+Beim Return hätte ich ein neues Json mit dem Fahrername und seinen Punkten
+bauen und zurückgeben können.
+[source,java]
+----
+    @GET
+    @Path("points")
+    @Produces(MediaType.APPLICATION_JSON)
+    public JsonObject getPointsSumOfDriver(
+            @QueryParam("name") String name
+    ) {
+        TypedQuery<Driver> query1 = em
+                .createNamedQuery("Driver.findDriverByName", Driver.class)
+                .setParameter("NAME", name);
+        Driver d = query1.getSingleResult();
+        Long driverId = d.getId();
+        TypedQuery<Result> query2 = em
+                .createNamedQuery("Result.findDriverPointsById", Result.class)
+                .setParameter("DRIVER", driverId);
+        Result r = query2.getSingleResult();
+
+        return null;
+    }
+----
+
+==== Verbesserung:
+
+[source, java]
+----
+include::src/main/java/at/htl/formula1/entity/Result.java[tags=Result.sumPointsForDriver]
+----
+// end::getPointsSumOfDriver[]
+[source, java]
+----
+include::src/main/java/at/htl/formula1/boundary/ResultsEndpoint.java[tags=getPointsSumOfDriver]
+----
